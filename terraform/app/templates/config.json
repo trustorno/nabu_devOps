@@ -1,0 +1,41 @@
+[
+  {
+    "command": [
+      "$${command}"
+    ],
+    "name": "$${name}",
+    "cpu": 1,
+    "memory": 500,
+    "memoryReservation": 200,
+    "environment": [
+      {
+        "name": "AWS_ACCESS_KEY_ID",
+        "value": "${s3_key}"
+      },
+      {
+        "name": "AWS_SECRET_ACCESS_KEY",
+        "value": "${s3_secret}"
+      },
+      {
+        "name": "AWS_STORAGE_BUCKET_NAME",
+        "value": "${s3_bucket_name}"
+      },
+      {
+        "name": "REDIS_HOST",
+        "value": "${redis_host}"
+      },
+      {
+        "name": "DB_HOST",
+        "value": "${db_host}"
+      }
+    ],
+    "essential": true,
+    "image": "$${image}",
+    "portMappings": [
+      {
+        "containerPort": 80,
+        "hostPort": 0
+      }
+    ]
+  }
+]

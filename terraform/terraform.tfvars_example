@@ -1,0 +1,14 @@
+# Specify variables for your environment, variables can be found in variables.tf
+
+# will be used for names and tags
+environment_name = "dev"
+
+db_password = "pass"
+
+# Define your VPC id, CHANGE IT
+vpc_id = "vpc-f9b4559f"
+
+# Name of SSH key from EC2 key pairs
+ssh_key_name = "ssh_key"
+
+image_tag = "tag"
