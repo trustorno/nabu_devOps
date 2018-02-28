@@ -1,8 +1,5 @@
 [
   {
-    "command": [
-      "$${command}"
-    ],
     "name": "$${name}",
     "cpu": 1,
     "memory": 500,
@@ -30,7 +27,7 @@
       }
     ],
     "essential": true,
-    "image": "$${image}",
+    "image": "${image}",
     "portMappings": [
       {
         "containerPort": 80,

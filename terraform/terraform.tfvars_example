@@ -5,9 +5,6 @@ environment_name = "dev"
 
 db_password = "pass"
 
-# Define your VPC id, CHANGE IT
-vpc_id = "vpc-f9b4559f"
-
 # Name of SSH key from EC2 key pairs
 ssh_key_name = "ssh_key"
 

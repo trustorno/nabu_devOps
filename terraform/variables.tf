@@ -10,9 +10,6 @@ variable "region" {
 variable "ssh_key_name" {
 }
 
-variable "vpc_id" {
-}
-
 variable "db_storage" {
   default = "30"
   description = "Storage size in GB"
@@ -62,11 +59,11 @@ variable "dynamo_write_capacity" {
 }
 
 variable "ecs_desired_capacity" {
-  default = 3
-}
-variable "ecs_min_capacity" {
   default = 2
 }
+variable "ecs_min_capacity" {
+  default = 1
+}
 variable "ecs_max_capacity" {
-  default = 5
+  default = 3
 }

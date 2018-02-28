@@ -7,6 +7,7 @@ resource "aws_elasticache_subnet_group" "redis" {
 
 resource "aws_elasticache_cluster" "redis" {
   cluster_id = "tf-redis-${var.environment_name}"
+
   engine = "redis"
   engine_version = "3.2.10"
   node_type = "${var.redis_instance_type}"
@@ -16,6 +17,7 @@ resource "aws_elasticache_cluster" "redis" {
   security_group_ids = [
     "${aws_security_group.allow_internal.id}"
   ]
+  subnet_group_name = "${aws_elasticache_subnet_group.redis.name}"
 }
 
 
@@ -31,7 +33,7 @@ resource "aws_db_instance" "db" {
   identifier = "tf-rds-${var.environment_name}"
   allocated_storage = "${var.db_storage}"
   engine = "postgres"
-  engine_version = "9.6.5"
+  engine_version = "9.6.6"
   instance_class = "${var.db_instance_type}"
   name = "${var.db_name}"
   username = "${var.db_user}"
