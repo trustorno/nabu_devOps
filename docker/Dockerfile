@@ -91,7 +91,7 @@ RUN echo $(pip --version)
 RUN echo $(python --version)
 
 
-RUN pip install --upgrade awscli==1.14.5 s3cmd==2.0.1 python-magic sh mysqlclient pandas numpy SQLAlchemy
+RUN pip install --upgrade awscli==1.14.5 s3cmd==2.0.1 python-magic sh mysqlclient pandas numpy SQLAlchemy psycopg2-binary
 RUN echo $(aws --version)
 RUN echo $(aws s3 ls s3://tf-bucket-dev/VIDEOS/)
 #RUN aws s3 cp s3://tf-bucket-dev/VIDEOS/test1.mp4 s3://tf-bucket-dev/OUTPUT/

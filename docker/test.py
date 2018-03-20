@@ -4,7 +4,7 @@ import sys
 import argparse
 import logging
 import sh
-import MySQLdb
+#import MySQLdb
 from subprocess import call
 from pandas.io import sql
 import pandas as pd
@@ -25,53 +25,46 @@ def parse_args():
 
 if __name__ == "__main__":	
   args = parse_args()
-	
+  
+  #output the info messages
+  logging.getLogger().setLevel(logging.INFO)	
  
   #copying the file from S3 to S3
-  #try:
-  #s3 = sh.bash.bake("aws s3")
-  #s3.cp(args.s3_bucket_input, args.s3_bucket_output)
-  #os.system("aws s3 cp {s3_bucket_input} {s3_bucket_output}".format(s3_bucket_input=args.s3_bucket_input, s3_bucket_output=args.s3_bucket_output))
-  #os.system("aws s3 ls s3://tf-bucket-dev/OUTPUT/")
-  #logging.warning("File copied to S3 location: {s3_bucket_output}".format(s3_bucket_output=args.s3_bucket_output))
-  #except:
-  #  logging.error("File is not copied to S3")
+  try:
+    os.system("aws s3 cp {s3_bucket_input} {s3_bucket_output}".format(s3_bucket_input=args.s3_bucket_input, s3_bucket_output=args.s3_bucket_output))
+    os.system("aws s3 ls s3://tf-bucket-dev/OUTPUT/")
+    logging.info("File copied to S3 location: {s3_bucket_output}".format(s3_bucket_output=args.s3_bucket_output))
+  except:
+    logging.error("File is not copied to S3")
+
     
-    
-  #saving output to the mysql db
-  #try:
-  db = MySQLdb.connect(host=args.db_host,    # your host, usually localhost
-                       user=args.db_user,         # your username
-                       passwd=args.db_pass,  # your password
-                       db=args.db_name)        # name of the data base
-                       
-  engine = create_engine("mysql+mysqldb://{user}:{passwd}@{host}/{db}".format(host=args.db_host,    # your host, usually localhost
+  #saving output to the postgres db
+  try:                 
+    engine = create_engine("postgres://{user}:{passwd}@{host}/{db}".format(host=args.db_host,    # your host, usually localhost
                                                                                    user=args.db_user,         # your username
                                                                                    passwd=args.db_pass,  # your password
                                                                                    db=args.db_name))       # name of the data base)
 
+    df = pd.DataFrame(np.random.randint(0,100,size=(100, 4)), columns=list('BCDE'))
+    df.to_sql(con=engine, name='table_name_postgresql', if_exists='replace')
+    logging.info("Results saved to the DB")
+
+  except:
+    logging.error("Cannot save to DB")
     
-  # you must create a Cursor object. It will let
-  #  you execute all the queries you need
-  
-  df = pd.DataFrame(np.random.randint(0,100,size=(100, 4)), columns=list('ABCD'))
-  df.to_sql(con=engine, name='table_name_for_df', if_exists='replace')
-  db.commit()
-  
-  
-  print "test"
-  
-  # Use all the SQL you like
-  cur = db.cursor()
-  cur.execute("show tables")
-  
-  # print all the first cell of all the rows
-  for row in cur.fetchall():
-      logging.warning(row[0])
-  
-  db.close()  
-  logging.warning("Data saved to DB")
-  #except:
-  #  logging.error("Cannot save to DB")
-    
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
    
