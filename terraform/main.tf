@@ -60,12 +60,11 @@ module "app" {
   environment_name = "${var.environment_name}"
   ecs_iam_role = "${data.aws_iam_role.for_ecs.arn}"
   redis_host = "${aws_elasticache_cluster.redis.cache_nodes.0.address}"
-  //  db_name = "${var.db_name}"
-  //  db_user = "${var.db_user}"
-  //  db_password = "${var.db_password}"
-  db_host = "${aws_db_instance.db.address}"
-  //  Temp image
-  image = "nginx"
+  image = "${data.aws_ecr_repository.image.repository_url}"
   cluster_id = "${aws_ecs_cluster.ecs-cluster-web.id}"
   target_lb_group_arn = "${aws_alb_target_group.lb-tg.arn}"
+  db_host = "${aws_db_instance.db.address}"
+  db_user = "${aws_db_instance.db.username}"
+  db_pass = "${aws_db_instance.db.password}"
+  db_name = "${aws_db_instance.db.name}"
 }

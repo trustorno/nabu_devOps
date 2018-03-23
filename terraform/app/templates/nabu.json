@@ -1,0 +1,24 @@
+[
+  {
+    "name": "${name}",
+    "cpu": 1,
+    "memory": 900,
+    "memoryReservation": 800,
+    "essential": true,
+    "image": "${image}",
+    "command": [
+      "-i",
+      "s3://${s3_bucket_name}/VIDEOS/test1.mp4",
+      "-o",
+      "s3://${s3_bucket_name}/OUTPUT/output_video.mp4",
+      "-d",
+      "${db_host}",
+      "-u",
+      "${db_user}",
+      "-p",
+      "${db_pass}",
+      "-n",
+      "${db_name}"
+    ]
+  }
+]

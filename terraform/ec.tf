@@ -44,7 +44,7 @@ resource "aws_launch_configuration" "ecs-ec2-instance" {
   ]
 
   key_name = "${var.ssh_key_name}"
-  image_id = "${data.aws_ami.ecs_ami-auto.id}"
+  image_id = "${var.aws_ami_const}"
   instance_type = "${var.ecs_ami_instance_type}"
   associate_public_ip_address = true
   user_data = "${data.template_file.ecs_init_launch.rendered}"

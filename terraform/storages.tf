@@ -39,7 +39,8 @@ resource "aws_db_instance" "db" {
   username = "${var.db_user}"
   password = "${var.db_password}"
   vpc_security_group_ids = [
-    "${aws_security_group.allow_internal.id}"]
+    "${aws_security_group.allow_internal.id}"
+  ]
   db_subnet_group_name = "${aws_db_subnet_group.db.id}"
   multi_az = false
   # TODO: do something with snapshot

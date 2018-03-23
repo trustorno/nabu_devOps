@@ -70,12 +70,15 @@ data "aws_ami" "ecs_ami-auto" {
   }
 }
 
+variable "aws_ami_const" {
+  default = "ami-0693ed7f"
+}
 data "aws_iam_role" "for_ecs" {
   name = "AWSServiceRoleForECS"
 }
 
 data "aws_ecr_repository" "image" {
-  name = "image"
+  name = "nabu"
 }
 
 
