@@ -29,10 +29,12 @@ WORKDIR $CAFFE_ROOT
 
 # FIXME: use ARG instead of ENV once DockerHub supports this
 # https://github.com/docker/hub-feedback/issues/460
+
 ENV CLONE_TAG=1.0
 
+RUN echo $(pip --version)
 RUN git clone -b ${CLONE_TAG} --depth 1 https://github.com/BVLC/caffe.git . && \
-    pip3 install --upgrade pip && \
+    pip3 install --upgrade pip==9.0.3 && \
     cd python && for req in $(cat requirements.txt) pydot 'python-dateutil>2'; do pip3 install $req; done && cd .. && \
     git clone https://github.com/NVIDIA/nccl.git && cd nccl && make -j install && cd .. && rm -rf nccl && \
     mkdir build && cd build && \
