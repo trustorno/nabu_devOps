@@ -12,6 +12,7 @@ import pandas as pd
 from pandas.io import sql
 from sqlalchemy import create_engine
 import logging
+import boto3
 
 
 #output the info messages
@@ -956,7 +957,7 @@ def loadBase(basePath, model, load_base):
 
   return baseFeatures, baseNames
 
-def videoProcessing(videoPath, detectModel, checkModels, basePath):
+def videoProcessing(filename, detectModel, checkModels, basePath):
 
   #detect param 
   minsize = 20
@@ -964,12 +965,12 @@ def videoProcessing(videoPath, detectModel, checkModels, basePath):
   threshold = [0.75, 0.85, 0.95]
   
   fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-  videoCapture = cv2.VideoCapture(videoPath)
+  videoCapture = cv2.VideoCapture(filename)
   test, _ = videoCapture.read()
   print("read the video: " + str(test))
   videoCapture.set(cv2.CAP_PROP_FRAME_WIDTH,640)  
   videoCapture.set(cv2.CAP_PROP_FRAME_HEIGHT,480)
-  out_filename = 'output.avi'
+  out_filename = 'labeled_' + filename.split('.')[0] + '.avi'
   out = cv2.VideoWriter(out_filename, fourcc, 4.0, (1280,720))
 
   fNumber = 0  
@@ -1124,17 +1125,11 @@ def videoProcessing(videoPath, detectModel, checkModels, basePath):
        
   #save the file to s3 location
   try:
-    os.system("aws s3 cp ./{out_filename} {S3bucket}{outS3bucketPath}".format(S3bucket=args.S3bucket, outS3bucketPath=args.outS3bucketPath, out_filename=out_filename))
+    os.system("aws s3 cp ./{out_filename} s3://{S3bucket}/{outS3bucketPath}{out_filename}".format(S3bucket=args.S3bucket, outS3bucketPath=args.outS3bucketPath, out_filename=out_filename))
     logging.info("File copied to S3 location: {outS3bucketPath}".format(outS3bucketPath=args.outS3bucketPath))
   except:
     logging.error("File not copied to S3")  
-  
-  results_df.to_csv('results.csv')
-  #save the csv to s3 location
-  try:
-    os.system("aws s3 cp ./results.csv {S3bucket}OUTPUT/".format(S3bucket=args.S3bucket))
-  except:
-    logging.error("CSV not copied to S3")  
+   
   
   if (frameCount != 0):
     detetctTime /= frameCount
@@ -1217,9 +1212,10 @@ def initAttributeModel():
   
 def parse_args():
   parser = argparse.ArgumentParser()
-  parser.add_argument('-i', '--inS3bucketPath', default = 'VIDEO/test4.mp4')
-  parser.add_argument('-o', '--outS3bucketPath', default = 'OUTPUT/out1.avi')
-  parser.add_argument('-t', '--S3bucket', default = 's3://tf-bucket-dev/')
+  parser.add_argument('-i', '--inS3bucketPath', default = 'VIDEOS/RAW/')
+  parser.add_argument('-r', '--procS3bucketPath', default = 'VIDEOS/RAW_PROCESSED/')
+  parser.add_argument('-o', '--outS3bucketPath', default = 'VIDEOS/OUT/')
+  parser.add_argument('-t', '--S3bucket', default = 'tf-bucket-dev')
   parser.add_argument('-f', '--functionString', default = '111110')
   parser.add_argument('-d', '--db_host', default = '')
   parser.add_argument('-u', '--db_user', default = '')
@@ -1239,13 +1235,36 @@ if __name__ == "__main__":
   checkModels = np.array([int(i) for i in args.functionString])
   checkModels = 2 * checkModels - 1
   
-  #get the file from s3 location
-  tmp_filename = 'video.mp4'
-  os.system("aws s3 cp {S3bucket}{inS3bucketPath} ./{tmp_filename}".format(S3bucket=args.S3bucket, inS3bucketPath=args.inS3bucketPath, tmp_filename=tmp_filename))
-  logging.info("File copied from S3 location: {inS3bucketPath}".format(inS3bucketPath=args.inS3bucketPath))
-  print(tmp_filename)
-  os.system('ls -la')
   
   detectModel= initDetectionModel()
-  videoProcessing(tmp_filename, detectModel, checkModels, baseFolderPath)  
+  
+  #intiate s3 resource
+  s3 = boto3.resource('s3')
+  
+  # select bucket
+  my_bucket = s3.Bucket(args.S3bucket)
+  
+  # download file into current directory
+  for obj in my_bucket.objects.filter(Prefix=args.inS3bucketPath):
+      if obj.key.endswith('mp4'):
+          logging.info("Processing file {name}".format(name=obj.key))
+          filename = obj.key.split('/')[-1]
+          
+          #check if the file can be moved
+          #if the another process already moved the file this process wouldn't duplicate the work
+          move_success = 0
+          try:
+            os.system("aws s3 mv s3://{S3bucket}/{inS3bucketPath}{filename} s3://{S3bucket}/{procS3bucketPath}{filename}".format(
+                            S3bucket=args.S3bucket, 
+                            inS3bucketPath=args.inS3bucketPath, 
+                            procS3bucketPath=args.procS3bucketPath, 
+                            filename=filename))
+            move_success = 1
+          except:
+            logging.warning("File {name} cannot be moved".format(name = obj.key))
+          
+          if move_success==1:
+            my_bucket.download_file(args.procS3bucketPath+filename, filename)
+            #process the downloaded video
+            videoProcessing(filename, detectModel, checkModels, baseFolderPath)  
   
